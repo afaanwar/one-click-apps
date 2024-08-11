@@ -1,55 +1,93 @@
 captainVersion: 4
-networks:
-    db:
-        driver: bridge
-    search:
-        driver: bridge
 services:
-    $$cap_appname-db:
-        image: postgres:$$cap_postgres_version
-        volumes:
-            - $$cap_appname-db-data:/var/lib/postgresql/data
-        restart: always
-        environment:
-            POSTGRES_USER: odoo
-            POSTGRES_PASSWORD: $$cap_postgres_password
-            POSTGRES_DB: postgres
-        caproverExtra:
-            notExposeAsWebApp: 'true'
+    # Odoo Custom Service
     $$cap_appname:
-        image: odoo:$$cap_odoo_version
-        depends_on:
-            - $$cap_appname-db
-        volumes:
-            - $$cap_appname-odoo-web-data:/var/lib/odoo
-            - $$cap_appname-config:/etc/odoo
-            - $$cap_appname-addons:/mnt/extra-addons
+        image: odoo:$$cap_oe_version
         restart: always
         environment:
-            POSTGRES_PASSWORD: $$cap_postgres_password
-            HOST: srv-captain--$$cap_appname-db
+            OE_USER: $$cap_oe_user
+            OE_HOME: /$$cap_oe_user
+            OE_HOME_EXT: /$$cap_oe_user/$$cap_oe_user-server
+            INSTALL_WKHTMLTOPDF: $$cap_install_wkhtmltopdf
+            OE_PORT: $$cap_oe_port
+            OE_VERSION: $$cap_oe_version
+            IS_ENTERPRISE: $$cap_is_enterprise
+            INSTALL_POSTGRESQL_FOURTEEN: $$cap_install_postgresql_fourteen
+            INSTALL_NGINX: $$cap_install_nginx
+            OE_SUPERADMIN: $$cap_oe_superadmin
+            GENERATE_RANDOM_PASSWORD: $$cap_generate_random_password
+            OE_CONFIG: $$cap_oe_config
+            WEBSITE_NAME: $$cap_website_name
+            LONGPOLLING_PORT: $$cap_longpolling_port
+            ENABLE_SSL: $$cap_enable_ssl
+            ADMIN_EMAIL: $$cap_admin_email
         caproverExtra:
             containerHttpPort: '8069'
+
 caproverOneClickApp:
-    displayName: 'Odoo'
     variables:
-        - id: $$cap_postgres_version
-          label: Postgres Version
-          defaultValue: 9.6.18-alpine
-          description: Check out their docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/
-          validRegex: /^([^\s^\/])+$/
-        - id: $$cap_postgres_password
-          label: Postgres Password
-          description: ''
-          validRegex: /.{1,}/
-        - id: $$cap_odoo_version
+        - id: $$cap_oe_user
+          label: Odoo User
+          defaultValue: 'odoo'
+          description: The user that Odoo runs as.
+        - id: $$cap_oe_port
+          label: Odoo Port
+          defaultValue: '8069'
+          description: The port Odoo will run on.
+        - id: $$cap_oe_version
           label: Odoo Version
-          defaultValue: '13.0'
-          description: Check out their docker page for the valid tags https://hub.docker.com/_/odoo?tab=tags
-          validRegex: /^([^\s^\/])+$/
+          defaultValue: '16.0'
+          description: The Odoo version to use.
+        - id: $$cap_is_enterprise
+          label: Enterprise Edition
+          defaultValue: 'False'
+          description: Whether to use the Enterprise edition of Odoo.
+        - id: $$cap_install_wkhtmltopdf
+          label: Install wkhtmltopdf
+          defaultValue: 'True'
+          description: Whether to install wkhtmltopdf.
+        - id: $$cap_install_postgresql_fourteen
+          label: Install PostgreSQL 14
+          defaultValue: 'True'
+          description: Whether to install PostgreSQL 14.
+        - id: $$cap_install_nginx
+          label: Install Nginx
+          defaultValue: 'True'
+          description: Whether to install Nginx.
+        - id: $$cap_oe_superadmin
+          label: Odoo Superadmin Password
+          defaultValue: 'admin'
+          description: The password for the Odoo superadmin.
+        - id: $$cap_generate_random_password
+          label: Generate Random Password
+          defaultValue: 'True'
+          description: Whether to generate a random password for Odoo.
+        - id: $$cap_oe_config
+          label: Odoo Config
+          defaultValue: 'odoo-server'
+          description: The configuration directory for Odoo.
+        - id: $$cap_website_name
+          label: Website Name
+          defaultValue: '_'
+          description: The name of the website.
+        - id: $$cap_longpolling_port
+          label: Longpolling Port
+          defaultValue: '8072'
+          description: The port for Odoo longpolling.
+        - id: $$cap_enable_ssl
+          label: Enable SSL
+          defaultValue: 'True'
+          description: Whether to enable SSL.
+        - id: $$cap_admin_email
+          label: Admin Email
+          defaultValue: 'odoo@example.com'
+          description: The email address for the Odoo admin.
     instructions:
-        start: Odoo is an open source product CRM
-        end: Odoo is deployed and the dashboard is available from http://$$cap_appname.$$cap_root_domain.
-    isOfficial: true
-    description: Odoo, formerly known as OpenERP, is a suite of open-source business apps written in Python and released under the AGPL license.
-    documentation: https://hub.docker.com/_/odoo?tab=description
+        start: >-
+            Odoo is an open-source ERP and CRM system that helps businesses manage their operations efficiently. Ensure you have provided the correct configuration settings to avoid any issues during startup.
+        end: >-
+            Setup is complete! 🎉 Your Odoo instance is available at http://$$cap_appname.$$cap_root_domain
+    displayName: 'Odoo Custom'
+    isOfficial: false
+    description: Customizable Odoo deployment with options for configuration.
+    documentation: Visit https://www.odoo.com/documentation/ for more details.
